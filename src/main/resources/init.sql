@@ -1,0 +1,308 @@
+-- ============================================
+-- 淘宝电商系统 - Spring Boot 启动初始化脚本
+-- ============================================
+-- 用途：放在 classpath:init.sql，Spring Boot 启动时自动执行
+-- 特性：CREATE TABLE IF NOT EXISTS + INSERT IGNORE，重启安全
+-- 字符集：utf8mb4 / utf8mb4_unicode_ci
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `account` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_type` enum('operator','merchant','customer','visitor') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` enum('active','inactive','locked') COLLATE utf8mb4_unicode_ci DEFAULT 'active',
+  `username` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `gender` enum('male','female','unknown') COLLATE utf8mb4_unicode_ci DEFAULT 'unknown',
+  `birthday` date DEFAULT NULL,
+  `phone` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `avatar_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`) USING BTREE,
+  UNIQUE KEY `account` (`account`) USING BTREE,
+  KEY `idx_user_account` (`account`) USING BTREE,
+  KEY `idx_user_phone` (`phone`) USING BTREE,
+  KEY `idx_user_email` (`email`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+INSERT IGNORE INTO `user` (`user_id`, `account`, `password`, `user_type`, `status`, `username`, `gender`, `phone`, `email`, `avatar_url`) VALUES
+(1,  'admin',           'e10adc3949ba59abbe56e057f20f883e', 'operator', 'active', '统管理员',     'unknown', '13800138000', 'admin@example.com',     NULL),
+(2,  'merchant_digital','e10adc3949ba59abbe56e057f20f883e', 'merchant', 'active', '数码科技旗舰店', 'unknown', '13800138001', 'digital@example.com',   NULL),
+(3,  'merchant_fresh',  'e10adc3949ba59abbe56e057f20f883e', 'merchant', 'active', '新鲜果蔬专营店', 'unknown', '13800138002', 'fresh@example.com',     NULL),
+(4,  'merchant_book',   'e10adc3949ba59abbe56e057f20f883e', 'merchant', 'active', '知识宝库书店',   'unknown', '13800138003', 'book@example.com',      NULL),
+(5,  'merchant_fashion','e10adc3949ba59abbe56e057f20f883e', 'merchant', 'active', '时尚潮流服饰店', 'unknown', '13800138004', 'fashion@example.com',   NULL),
+(6,  'merchant_snack',  'e10adc3949ba59abbe56e057f20f883e', 'merchant', 'active', '美味零食屋',     'unknown', '13800138006', 'snack@example.com',     NULL),
+(7,  'merchant_pet',    'e10adc3949ba59abbe56e057f20f883e', 'merchant', 'active', '萌宠乐园',       'unknown', '13800138005', 'pet@example.com',       NULL),
+(8,  'user1',           'e10adc3949ba59abbe56e057f20f883e', 'customer', 'active', '咋',             'unknown', '',             '',                     'https://taobao-hqh.oss-cn-beijing.aliyuncs.com/2025/12/8a2d26da-04b2-44c2-9eda-fea5c5692d82.jpg'),
+(9,  'user2',           'e10adc3949ba59abbe56e057f20f883e', 'customer', 'active', '李四',           'unknown', '13900139002', 'user2@example.com',     NULL),
+(10, 'user3',           'e10adc3949ba59abbe56e057f20f883e', 'customer', 'active', '王五',           'unknown', '13900139003', 'user3@example.com',     NULL),
+(14, '91917878',        'e10adc3949ba59abbe56e057f20f883e', 'operator', 'active', NULL,             NULL,     NULL,          NULL,                   'https://taobao-hqh.oss-cn-beijing.aliyuncs.com/2025/12/05786809-e8e7-4225-8d51-316fb819a767.png'),
+(15, 'CharshHanzo',     'e10adc3949ba59abbe56e057f20f883e', 'operator', 'active', NULL,             NULL,     NULL,          NULL,                   'https://taobao-hqh.oss-cn-beijing.aliyuncs.com/2025/12/211a2512-d8f9-4ce1-a25b-5d72bd7f96f6.jpg'),
+(16, 'tttttt',          'e10adc3949ba59abbe56e057f20f883e', 'customer', 'active', 'tttttt',         'unknown', '',             '',                     NULL),
+(17, 'hythyt',          'e10adc3949ba59abbe56e057f20f883e', 'customer', 'active', 'hyt666',         'unknown', '17786897978',  '14982392742@QQ.com',  'https://taobao-hqh.oss-cn-beijing.aliyuncs.com/2025/12/3cc2db57-44ba-4160-99a8-9bf1822e05b2.png');
+
+CREATE TABLE IF NOT EXISTS `shop` (
+  `shop_id` int(11) NOT NULL AUTO_INCREMENT,
+  `merchant_id` int(11) NOT NULL,
+  `shop_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `shop_description` text COLLATE utf8mb4_unicode_ci,
+  `shop_logo` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `shop_banner` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` enum('normal','closed','auditing') COLLATE utf8mb4_unicode_ci DEFAULT 'auditing',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`shop_id`) USING BTREE,
+  UNIQUE KEY `uk_merchant` (`merchant_id`) USING BTREE,
+  UNIQUE KEY `uk_shop_name` (`shop_name`) USING BTREE,
+  KEY `idx_shop_merchant` (`merchant_id`) USING BTREE,
+  KEY `idx_shop_name` (`shop_name`) USING BTREE,
+  KEY `idx_shop_status` (`status`) USING BTREE,
+  CONSTRAINT `shop_ibfk_1` FOREIGN KEY (`merchant_id`) REFERENCES `user` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+INSERT IGNORE INTO `shop` (`shop_id`, `merchant_id`, `shop_name`, `shop_description`, `shop_logo`, `shop_banner`, `status`) VALUES
+(1, 2, '数码科技旗舰店', '专业销售各类数码产品，包括手机、电脑、数码配件等，品质保证，售后服务完善', 'shop/2025/12/digital_logo.jpg', 'shop/2025/12/digital_banner.jpg',  'normal'),
+(2, 3, '新鲜果蔬专营店', '每日新鲜直达，提供各类水果、蔬菜、生鲜食品，绿色健康，放心选购',       'shop/2025/12/fresh_logo.jpg',   'shop/2025/12/fresh_banner.jpg',    'normal'),
+(3, 4, '知识宝库书店',   '海量图书资源，涵盖文学、科技、教育、生活等各类书籍，满足您的阅读需求', 'shop/2025/12/book_logo.jpg',    'shop/2025/12/book_banner.jpg',     'normal'),
+(4, 5, '时尚潮流服饰店', '紧跟时尚潮流，提供各类服装、鞋包、配饰，让您穿出独特风格',             'shop/2025/12/fashion_logo.jpg', 'shop/2025/12/fashion_banner.jpg',  'normal'),
+(5, 6, '美味零食屋',     '各类零食小吃，包括薯片、巧克力、坚果等，休闲追剧必备，美味不可抵挡',   'shop/2025/12/snack_logo.jpg',   'shop/2025/12/snack_banner.jpg',    'normal'),
+(6, 7, '萌宠乐园',       '专业宠物用品商店，提供宠物食品、玩具、洗护用品等，关爱您的宠物健康成长', 'shop/2025/12/pet_logo.jpg',     'shop/2025/12/pet_banner.jpg',      'auditing');
+
+CREATE TABLE IF NOT EXISTS `product` (
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_name` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `main_images` varchar(1000) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `detail_images` varchar(1000) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `merchant_id` int(11) NOT NULL,
+  `shop_id` int(11) NOT NULL,
+  `status` enum('on_sale','off_sale') COLLATE utf8mb4_unicode_ci DEFAULT 'on_sale',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`product_id`) USING BTREE,
+  KEY `idx_product_merchant` (`merchant_id`) USING BTREE,
+  KEY `idx_product_shop` (`shop_id`) USING BTREE,
+  CONSTRAINT `product_ibfk_1` FOREIGN KEY (`merchant_id`) REFERENCES `user` (`user_id`),
+  CONSTRAINT `product_ibfk_2` FOREIGN KEY (`shop_id`) REFERENCES `shop` (`shop_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+INSERT IGNORE INTO `product` (`product_id`, `product_name`, `description`, `main_images`, `detail_images`, `category_id`, `merchant_id`, `shop_id`, `status`) VALUES
+(1,  'iPhone 15 Pro',    '苹果iPhone 15 Pro，搭载A17 Pro芯片，钛金属设计',           '["2025/12/70d18f96-9c5b-4dae-ae74-f825862a2fbc.png"]', '["2025/12/1fae9f12-ad78-4898-a619-9307be0be1c6.png"]', 1, 2, 1, 'on_sale'),
+(2,  '华为Mate 60 Pro',  '华为Mate 60 Pro，支持卫星通信，麒麟9000S芯片',             '["2025/12/bbc9e02a-887c-48ae-8a96-fd90bc3ac0df.png"]', '["2025/12/b47444ff-2f37-4ba2-861f-ac01c18ec685.png"]', 1, 2, 1, 'on_sale'),
+(3,  '小米14',           '小米14，骁龙8 Gen 3处理器，徕卡影像',                    '["2025/12/7e273558-9933-47b5-a517-75b9e96ca58d.png"]', '["2025/12/717159b6-7854-4264-829b-9125642a73db.png"]', 1, 2, 1, 'on_sale'),
+(4,  '进口车厘子',        '智利进口JJ级车厘子，果实饱满，甜度高',                   '["2025/12/40ae3469-e2d4-49a1-9498-d0cf095648e5.png"]', '["2025/12/205007c8-a1b8-4d9e-b991-33e38348c4d8.png"]', 2, 3, 2, 'on_sale'),
+(5,  '新鲜草莓',         '红颜草莓，现摘现发，甜嫩多汁',                           '["2025/12/e5d8606e-d774-4f20-abef-235f26335807.png"]', '["2025/12/0cdef362-b957-4af7-ab64-19b58b2fa3fd.png"]', 2, 3, 2, 'on_sale'),
+(6,  '帝王蟹',           '鲜活帝王蟹，肉质鲜美，营养丰富',                         '["2025/12/c533724f-4ba1-43b0-8b37-1717b898f6dd.png"]', '["2025/12/d4a1e4ac-fd0c-4759-8add-750c337b1430.png"]', 2, 3, 2, 'on_sale'),
+(7,  '活着',             '余华经典小说，讲述生命的意义',                           '["2025/12/16d781a9-ae82-44cf-844b-3f67e7e7097d.png"]', '["2025/12/f43fc17e-7d99-47e9-a784-a3d6732c7b46.png"]', 3, 4, 3, 'on_sale'),
+(8,  '百年孤独',         '加西亚·马尔克斯代表作，魔幻现实主义经典',                '["2025/12/2e136c06-29c0-464b-a85e-c40c5970c777.png"]', '["2025/12/3a72ec5e-cdfd-4211-bf13-dcd168c9ba14.png"]', 3, 4, 3, 'on_sale'),
+(9,  '人类简史',         '尤瓦尔·赫拉利，从认知革命到未来',                        '["2025/12/ab0089bd-9802-4c3a-8fa4-ce5d1be4f51d.png"]', '["2025/12/7668f57b-da06-476b-ac8f-a71f44796cf2.png"]', 3, 4, 3, 'on_sale'),
+(10, '纯棉T恤',          '100%纯棉材质，舒适透气，多种颜色可选',                  '["2025/12/6400038e-9210-4061-a7f7-d66f347bdcd2.png"]', '["2025/12/12723473-4c4f-4f47-8025-11d411981c60.png"]', 4, 5, 4, 'on_sale'),
+(11, '牛仔裤',           '经典直筒牛仔裤，修身版型，百搭时尚',                     '["2025/12/fb031ad8-bef8-4454-a1fc-8d18bc02c193.png"]', '["2025/12/c889e541-acc1-4f55-a017-ff2838ff8dd9.png"]', 4, 5, 4, 'on_sale'),
+(12, '羽绒服',           '90%白鸭绒填充，保暖轻便，防风防水',                    '["2025/12/d68005b0-c1ec-451d-99e9-caa74420ce4b.png"]', '["2025/12/e7d30f72-d15d-4539-91a3-18c41c0bb7ca.png"]', 4, 5, 4, 'on_sale'),
+(13, '薯片大礼包',        '多种口味薯片组合，休闲追剧必备',                        '["2025/12/b72154a8-e3ee-4db4-b72c-eec6f9382766.png"]', '["2025/12/40cbf3d0-69c3-4d79-8a56-0d15eaf16970.png"]', 5, 6, 5, 'on_sale'),
+(14, '巧克力礼盒',        '进口巧克力，丝滑浓郁，送礼佳品',                        '["2025/12/a1484198-b55e-4df2-9919-7e27437bfeaf.png"]', '["2025/12/b137a062-5e7d-40e4-a979-5555165892f1.png"]', 5, 6, 5, 'on_sale'),
+(15, '坚果组合',         '混合坚果，营养健康，每日必备',                           '["2025/12/c3fa6381-865c-4b8d-addf-45d6ab24b5e6.png"]', '["2025/12/41792a50-748c-4150-928b-164c3060830a.png"]', 5, 6, 5, 'on_sale'),
+(16, '狗粮',             '天然狗粮，营养均衡，适合全年龄段狗狗',                  '["2025/12/fad39a8c-26b8-4634-918f-794962baa992.png"]', '["2025/12/962f8526-1f58-4683-a41b-d2f96cd86bee.png"]', 6, 7, 6, 'on_sale'),
+(17, '猫粮',             '猫粮，富含蛋白质，适合成年猫',                          '["2025/12/e148c64b-d32e-447d-a636-54c325cf24df.png"]', '["2025/12/9db0f568-3053-4c25-8918-94f9df4276bc.png"]', 6, 7, 6, 'on_sale'),
+(18, '宠物玩具',         '宠物玩具套装，互动玩耍，磨牙益智',                       '["2025/12/41d891f1-a6b7-492c-8ef1-da20990505ad.png"]', '["2025/12/ec8090aa-4cf5-4d5d-b448-990b26a07335.png"]', 6, 7, 6, 'on_sale');
+
+CREATE TABLE IF NOT EXISTS `product_sku` (
+  `sku_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_id` int(11) NOT NULL,
+  `sku_name` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sku_type` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `stock` int(11) NOT NULL DEFAULT '0',
+  `sold_count` int(11) DEFAULT '0',
+  `sku_image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` enum('on_sale','off_sale') COLLATE utf8mb4_unicode_ci DEFAULT 'on_sale',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`sku_id`) USING BTREE,
+  KEY `idx_sku_product` (`product_id`) USING BTREE,
+  CONSTRAINT `product_sku_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+INSERT IGNORE INTO `product_sku` (`sku_id`, `product_id`, `sku_name`, `sku_type`, `price`, `stock`, `sku_image`, `status`) VALUES
+(1,  1,  '256GB 原色钛金属',  'storage',  7999.00,  100, '2025/12/a3da5f6b-aea0-4b8a-a084-93caa4485b38.png', 'on_sale'),
+(2,  1,  '512GB 原色钛金属',  'storage',  8999.00,  80,  '2025/12/9c5456ce-efe4-48c6-82fb-86c87ba31907.png', 'on_sale'),
+(3,  1,  '1TB 原色钛金属',    'storage',  10999.00, 50,  '2025/12/1e1dceb2-2b4e-448d-9a28-7760ddf6cb8a.png', 'on_sale'),
+(4,  2,  '256GB 黑色',         'storage',  6999.00,  120, 'product/2025/12/huawei_mate60_256gb_black.jpg',  'on_sale'),
+(5,  2,  '256GB 紫色',         'storage',  6999.00,  100, 'product/2025/12/huawei_mate60_256gb_purple.jpg', 'on_sale'),
+(6,  2,  '512GB 黑色',         'storage',  7999.00,  90,  'product/2025/12/huawei_mate60_512gb_black.jpg',  'on_sale'),
+(7,  2,  '512GB 紫色',         'storage',  7999.00,  80,  'product/2025/12/huawei_mate60_512gb_purple.jpg', 'on_sale'),
+(8,  3,  '12GB+256GB 黑色',    'storage',  4999.00,  150, 'product/2025/12/xiaomi14_256gb_black.jpg',        'on_sale'),
+(9,  3,  '12GB+256GB 白色',    'storage',  4999.00,  130, 'product/2025/12/xiaomi14_256gb_white.jpg',        'on_sale'),
+(10, 3,  '16GB+512GB 黑色',    'storage',  5999.00,  110, 'product/2025/12/xiaomi14_512gb_black.jpg',        'on_sale'),
+(11, 3,  '16GB+512GB 白色',    'storage',  5999.00,  100, 'product/2025/12/xiaomi14_512gb_white.jpg',        'on_sale'),
+(12, 4,  '500g装',            'weight',   89.90,   200, 'product/2025/12/cherry_500g.jpg',                 'on_sale'),
+(13, 4,  '1kg装',             'weight',   159.90,  150, 'product/2025/12/cherry_1kg.jpg',                  'on_sale'),
+(14, 4,  '2kg装',             'weight',   299.00,  100, 'product/2025/12/cherry_2kg.jpg',                  'on_sale'),
+(15, 5,  '500g装',            'weight',   39.90,   300, 'product/2025/12/strawberry_500g.jpg',              'on_sale'),
+(16, 5,  '1kg装',             'weight',   69.90,   250, 'product/2025/12/strawberry_1kg.jpg',               'on_sale'),
+(17, 5,  '礼盒装 1.5kg',      'packaging',129.90,  100, 'product/2025/12/strawberry_gift.jpg',             'on_sale'),
+(18, 6,  '1.5kg-1.8kg',       'weight',   299.00,  50,  'product/2025/12/king_crab_1.5kg.jpg',              'on_sale'),
+(19, 6,  '1.8kg-2.2kg',       'weight',   399.00,  40,  'product/2025/12/king_crab_2kg.jpg',                'on_sale'),
+(20, 6,  '2.2kg-2.5kg',       'weight',   499.00,  30,  'product/2025/12/king_crab_2.5kg.jpg',              'on_sale'),
+(21, 7,  '平装版',            'version',  29.90,   500, 'product/2025/12/living_paperback.jpg',             'on_sale'),
+(22, 7,  '精装版',            'version',  49.90,   300, 'product/2025/12/living_hardcover.jpg',             'on_sale'),
+(23, 7,  '典藏版',            'version',  89.90,   150, 'product/2025/12/living_collector.jpg',             'on_sale'),
+(24, 8,  '平装版',            'version',  39.90,   400, 'product/2025/12/one_hundred_years_paperback.jpg',  'on_sale'),
+(25, 8,  '精装版',            'version',  59.90,   250, 'product/2025/12/one_hundred_years_hardcover.jpg',  'on_sale'),
+(26, 8,  '双语版',            'version',  79.90,   200, 'product/2025/12/one_hundred_years_bilingual.jpg',  'on_sale'),
+(27, 9,  '平装版',            'version',  49.90,   350, 'product/2025/12/sapiens_paperback.jpg',           'on_sale'),
+(28, 9,  '精装版',            'version',  69.90,   200, 'product/2025/12/sapiens_hardcover.jpg',           'on_sale'),
+(29, 9,  '插图版',            'version',  99.90,   150, 'product/2025/12/sapiens_illustrated.jpg',         'on_sale'),
+(30, 10, 'M码 白色',          'size',     59.90,   200, 'product/2025/12/cotton_tshirt_m_white.jpg',        'on_sale'),
+(31, 10, 'M码 黑色',          'size',     59.90,   200, 'product/2025/12/cotton_tshirt_m_black.jpg',        'on_sale'),
+(32, 10, 'L码 白色',          'size',     59.90,   200, 'product/2025/12/cotton_tshirt_l_white.jpg',        'on_sale'),
+(33, 10, 'L码 黑色',          'size',     59.90,   200, 'product/2025/12/cotton_tshirt_l_black.jpg',        'on_sale'),
+(34, 10, 'XL码 白色',         'size',     59.90,   150, 'product/2025/12/cotton_tshirt_xl_white.jpg',       'on_sale'),
+(35, 10, 'XL码 黑色',         'size',     59.90,   150, 'product/2025/12/cotton_tshirt_xl_black.jpg',       'on_sale'),
+(36, 11, '28码',              'size',     199.00,  150, 'product/2025/12/jeans_28.jpg',                     'on_sale'),
+(37, 11, '29码',              'size',     199.00,  150, 'product/2025/12/jeans_29.jpg',                     'on_sale'),
+(38, 11, '30码',              'size',     199.00,  150, 'product/2025/12/jeans_30.jpg',                     'on_sale'),
+(39, 11, '31码',              'size',     199.00,  120, 'product/2025/12/jeans_31.jpg',                     'on_sale'),
+(40, 11, '32码',              'size',     199.00,  120, 'product/2025/12/jeans_32.jpg',                     'on_sale'),
+(41, 12, 'M码 黑色',          'size',     399.00,  100, 'product/2025/12/down_jacket_m_black.jpg',          'on_sale'),
+(42, 12, 'M码 灰色',          'size',     399.00,  100, 'product/2025/12/down_jacket_m_gray.jpg',           'on_sale'),
+(43, 12, 'L码 黑色',          'size',     399.00,  100, 'product/2025/12/down_jacket_l_black.jpg',          'on_sale'),
+(44, 12, 'L码 灰色',          'size',     399.00,  100, 'product/2025/12/down_jacket_l_gray.jpg',           'on_sale'),
+(45, 12, 'XL码 黑色',         'size',     399.00,  80,  'product/2025/12/down_jacket_xl_black.jpg',         'on_sale'),
+(46, 12, 'XL码 灰色',         'size',     399.00,  80,  'product/2025/12/down_jacket_xl_gray.jpg',          'on_sale'),
+(47, 13, '1.5kg装',           'weight',   49.90,   250, 'product/2025/12/chips_gift_1.5kg.jpg',             'on_sale'),
+(48, 13, '2.5kg装',           'weight',   79.90,   200, 'product/2025/12/chips_gift_2.5kg.jpg',             'on_sale'),
+(49, 13, '5kg装',             'weight',   149.90,  150, 'product/2025/12/chips_gift_5kg.jpg',               'on_sale'),
+(50, 14, '300g装',            'weight',   69.90,   200, 'product/2025/12/chocolate_box_300g.jpg',           'on_sale'),
+(51, 14, '500g装',            'weight',   99.90,   180, 'product/2025/12/chocolate_box_500g.jpg',           'on_sale'),
+(52, 14, '1kg装',             'weight',   189.90,  150, 'product/2025/12/chocolate_box_1kg.jpg',            'on_sale'),
+(53, 14, '2kg装',             'weight',   349.90,  100, 'product/2025/12/chocolate_box_2kg.jpg',            'on_sale'),
+(54, 15, '500g装',            'weight',   49.90,   250, 'product/2025/12/nuts_mix_500g.jpg',                'on_sale'),
+(55, 15, '1kg装',             'weight',   89.90,   220, 'product/2025/12/nuts_mix_1kg.jpg',                 'on_sale'),
+(56, 15, '2kg装',             'weight',   169.90,  180, 'product/2025/12/nuts_mix_2kg.jpg',                 'on_sale'),
+(57, 15, '3kg装',             'weight',   239.90,  150, 'product/2025/12/nuts_mix_3kg.jpg',                 'on_sale'),
+(58, 16, '5kg装',             'weight',   99.00,   150, 'product/2025/12/dog_food_5kg.jpg',                 'on_sale'),
+(59, 16, '10kg装',            'weight',   179.00,  120, 'product/2025/12/dog_food_10kg.jpg',                'on_sale'),
+(60, 16, '20kg装',            'weight',   339.00,  100, 'product/2025/12/dog_food_20kg.jpg',                'on_sale'),
+(61, 17, '3kg装',             'weight',   79.00,   200, 'product/2025/12/cat_food_3kg.jpg',                 'on_sale'),
+(62, 17, '5kg装',             'weight',   129.00,  180, 'product/2025/12/cat_food_5kg.jpg',                 'on_sale'),
+(63, 17, '10kg装',            'weight',   239.00,  150, 'product/2025/12/cat_food_10kg.jpg',                'on_sale'),
+(64, 18, '小型犬套装',         'type',     79.90,   120, 'product/2025/12/pet_toys_small_dog.jpg',           'on_sale'),
+(65, 18, '中型犬套装',         'type',     99.90,   100, 'product/2025/12/pet_toys_medium_dog.jpg',          'on_sale'),
+(66, 18, '大型犬套装',         'type',     129.90,  80,  'product/2025/12/pet_toys_large_dog.jpg',           'on_sale'),
+(67, 18, '猫咪套装',           'type',     69.90,   150, 'product/2025/12/pet_toys_cat.jpg',                 'on_sale');
+
+CREATE TABLE IF NOT EXISTS `orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_no` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `total_amount` decimal(10,2) NOT NULL,
+  `status` enum('pending','paid','shipped','completed','cancelled') COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
+  `shipping_address` text COLLATE utf8mb4_unicode_ci,
+  `payment_time` datetime DEFAULT NULL,
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`order_id`) USING BTREE,
+  UNIQUE KEY `order_no` (`order_no`) USING BTREE,
+  KEY `idx_orders_user` (`user_id`) USING BTREE,
+  KEY `idx_orders_status` (`status`) USING BTREE,
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+INSERT IGNORE INTO `orders` (`order_id`, `order_no`, `user_id`, `total_amount`, `status`, `shipping_address`, `payment_time`) VALUES
+(1,  'TB2025120400001', 8,  7999.00,  'completed', '北京市朝阳区建国路88号',   '2025-12-05 16:26:39'),
+(2,  'TB2025120400002', 8,  159.90,  'pending',   '北京市朝阳区建国路88号',   NULL),
+(3,  'TB2025120400003', 9,  69.90,   'paid',      '广州市天河区天河路385号', '2025-12-05 16:26:39'),
+(4,  'TB2025120400004', 10, 59.90,   'shipped',   '深圳市南山区科技园',       '2025-12-05 16:26:39'),
+(5,  '3982e673f6ff',    15, 199.98,  'pending',   '仲恺602',                 NULL),
+(18, 'b93e32f302dd',    8,  7999.00,  'pending',   '北京市朝阳区建国路88号',   NULL),
+(19, 'e4a398de77d4',    8,  7999.00,  'paid',      '北京市朝阳区建国路88号',   NULL),
+(20, '7d7c5a416c3d',    8,  678.00,   'pending',   '北京市朝阳区建国路88号',   NULL),
+(21, '313c126e1a2f',    8,  127984.00,'pending',   '北京市朝阳区建国路88号',   NULL),
+(22, 'b9311fd255e2',    8,  7999.00,  'cancelled', '北京市朝阳区建国路88号',   NULL),
+(23, 'c556e7a5320d',    8,  139982.00,'pending',   '北京市朝阳区建国路88号',   NULL),
+(24, 'cc35f3d73fe0',    8,  140939.60,'pending',   '北京市朝阳区建国路88号',   NULL),
+(25, 'e20ab27f96ce',    8,  7999.00,  'cancelled', '北京市朝阳区建国路88号',   NULL),
+(26, '17f477c7a5e9',    8,  127984.00,'paid',      '北京市朝阳区建国路88号',   NULL),
+(27, 'c8a8c07715da',    8,  159.90,   'paid',      '上海市浦东新区陆家嘴金融中心', NULL),
+(28, '7bf180352f4f',    8,  127984.00,'paid',      '上海市浦东新区陆家嘴金融中心', NULL);
+
+CREATE TABLE IF NOT EXISTS `order_item` (
+  `item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `sku_id` int(11) NOT NULL,
+  `product_name` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sku_type` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT '1',
+  `total_price` decimal(10,2) NOT NULL,
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`item_id`) USING BTREE,
+  KEY `order_id` (`order_id`) USING BTREE,
+  KEY `sku_id` (`sku_id`) USING BTREE,
+  CONSTRAINT `order_item_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE,
+  CONSTRAINT `order_item_ibfk_2` FOREIGN KEY (`sku_id`) REFERENCES `product_sku` (`sku_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+INSERT IGNORE INTO `order_item` (`item_id`, `order_id`, `sku_id`, `product_name`, `sku_type`, `price`, `quantity`, `total_price`) VALUES
+(1,  1,  1,  'iPhone 15 Pro',  '256GB 原色钛金属',  7999.00,  1,  7999.00),
+(2,  2,  13, '进口车厘子',      '1kg装',            159.90,   1,  159.90),
+(3,  3,  16, '新鲜草莓',        '1kg装',            69.90,    1,  69.90),
+(4,  4,  33, '纯棉T恤',         'L码 黑色',         59.90,    1,  59.90),
+(5,  18, 1,  'iPhone 15 Pro',  'storage',          7999.00,  1,  7999.00),
+(6,  19, 1,  'iPhone 15 Pro',  'storage',          7999.00,  1,  7999.00),
+(7,  20, 60, '狗粮',            'weight',           339.00,   2,  678.00),
+(8,  21, 1,  'iPhone 15 Pro',  'storage',          7999.00,  16, 127984.00),
+(9,  22, 1,  'iPhone 15 Pro',  'storage',          7999.00,  1,  7999.00),
+(10, 23, 1,  'iPhone 15 Pro',  'storage',          7999.00,  16, 127984.00),
+(11, 23, 10, '小米14',          'storage',          5999.00,  2,  11998.00),
+(12, 24, 1,  'iPhone 15 Pro',  'storage',          7999.00,  16, 127984.00),
+(13, 24, 10, '小米14',          'storage',          5999.00,  2,  11998.00),
+(14, 24, 13, '进口车厘子',      'weight',           159.90,   1,  159.90),
+(15, 24, 15, '新鲜草莓',        'weight',           39.90,    3,  119.70),
+(16, 24, 60, '狗粮',            'weight',           339.00,   2,  678.00),
+(17, 25, 1,  'iPhone 15 Pro',  'storage',          7999.00,  1,  7999.00),
+(18, 26, 1,  'iPhone 15 Pro',  'storage',          7999.00,  16, 127984.00),
+(19, 27, 13, '进口车厘子',      'weight',           159.90,   1,  159.90),
+(20, 28, 1,  'iPhone 15 Pro',  'storage',          7999.00,  16, 127984.00);
+
+CREATE TABLE IF NOT EXISTS `cart_item` (
+  `cart_item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `sku_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT '1',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`cart_item_id`) USING BTREE,
+  UNIQUE KEY `uk_user_sku` (`user_id`,`sku_id`) USING BTREE,
+  KEY `sku_id` (`sku_id`) USING BTREE,
+  KEY `idx_cart_user` (`user_id`) USING BTREE,
+  CONSTRAINT `cart_item_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
+  CONSTRAINT `cart_item_ibfk_2` FOREIGN KEY (`sku_id`) REFERENCES `product_sku` (`sku_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+CREATE TABLE IF NOT EXISTS `user_address` (
+  `address_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `full_address` text COLLATE utf8mb4_unicode_ci,
+  `recipient_name` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `phone` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_default` tinyint(1) DEFAULT '0',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`address_id`) USING BTREE,
+  KEY `idx_address_user` (`user_id`) USING BTREE,
+  CONSTRAINT `user_address_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+INSERT IGNORE INTO `user_address` (`address_id`, `user_id`, `full_address`, `recipient_name`, `phone`, `is_default`) VALUES
+(2,  8,  '北京市朝阳区建国路88号',         '张三1',  '13900139001', 1),
+(3,  8,  '上海市浦东新区陆家嘴金融中心',   'hyt',    '13900139003', 0),
+(4,  9,  '广州市天河区天河路385号',         '李四',   '13900139002', 1),
+(5,  10, '深圳南山区科技园',                '王五',   '13900139003', 1),
+(8,  15, '广州仲恺602二号床',              '企划',   '13785645895', 1),
+(9,  15, '北京市朝阳区建国路88号',         '张三',   '13900139001', 0),
+(12, 14, '肇庆学院',                       'hyt',    '13800138001', 1);
