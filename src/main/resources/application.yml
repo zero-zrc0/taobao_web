@@ -2,10 +2,10 @@ spring:
   application:
     name: taobao_system
   datasource:
-    url: jdbc:mysql://47.118.20.132:3306/taobao_system?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://8.134.99.71:13306/taobao?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: taobao
-    password: o3174805204O
+    username: webdb
+    password: web123123
   servlet:
     multipart:
       max-file-size: 10MB
