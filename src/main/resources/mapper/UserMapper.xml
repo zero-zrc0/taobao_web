@@ -22,6 +22,7 @@
     <!-- 查询用户列表 -->
     <select id="getUserList" parameterType="org.taobao.dto.UserQueryDTO" resultMap="UserResultMap">
         SELECT user_id, account, password, user_type, status, username, gender, birthday, phone, email, avatar_url, create_time, update_time FROM user
+        <!--动态SQL条件拼接，根据传入参数自动生成WHERE子句-->
         <where>
             <if test="userId != null">
                 AND user_id = #{userId}

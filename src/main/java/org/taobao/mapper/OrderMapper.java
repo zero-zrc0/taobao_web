@@ -80,7 +80,7 @@ public interface OrderMapper {
      * 获取用户订单状态统计
      * 
      * @param userId 用户ID
-     * @return 各状态订单数量的列表
+     * @return 各状态订单数量（包含pending、paid、shipped、completed、cancelled字段）
      */
-    List<Map<String, Object>> getOrderStatusStatistics(Integer userId);
+    Map<String, Object> getOrderStatusStatistics(Integer userId);
 }

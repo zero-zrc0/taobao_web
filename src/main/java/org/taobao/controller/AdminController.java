@@ -13,7 +13,6 @@ import org.taobao.service.UserService;
 import org.taobao.utils.AliyunOSSOperator;
 import org.taobao.vo.AdminDashboardVO;
 import org.taobao.vo.PageResult;
-import org.taobao.vo.UserProfileVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,6 +39,10 @@ public class AdminController {
     /**
      * 管理员首页统计接口
      * 包括今日新增用户数、今日交易额、今日新增订单数、今日完成订单数
+     * 执行流程：
+     * 1.Service 层查询数据库统计信息
+     * 2.封装到 AdminDashboardVO 对象
+     * 3.成功返回 JSON，失败返回错误提示
      */
     @GetMapping("/dashboard")
     public Result<AdminDashboardVO> getDashboardData() {
@@ -62,7 +65,7 @@ public class AdminController {
             List<User> userList = userService.getUserList(userQueryDTO);
             // 获取用户总数
             Integer total = userService.getUserCount(userQueryDTO);
-            // 构建分页结果
+            // 构建分页结果，封装分页对象
             PageResult<User> pageResult = PageResult.build(userList, total.longValue(), userQueryDTO.getPageNum(),
                     userQueryDTO.getPageSize());
             return Result.success(pageResult);
@@ -233,9 +236,9 @@ public class AdminController {
             // 提取从第4个斜杠开始的所有内容，即 yyyy/MM/UUID.xxx
             String objectName = fullAvatarUrl.substring(firstSlashIndex + 1);
 
-            // 创建DTO对象，设置完整的avatarUrl到数据库
+            // 创建DTO对象，设置相对路径到数据库（避免签名URL过长）
             UserProfileUpdateDTO userProfileUpdateDTO = new UserProfileUpdateDTO();
-            userProfileUpdateDTO.setAvatarUrl(fullAvatarUrl);
+            userProfileUpdateDTO.setAvatarUrl(objectName);
 
             // 调用服务层更新用户头像
             userService.updateUserProfile(id, userProfileUpdateDTO);

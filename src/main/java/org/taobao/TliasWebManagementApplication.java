@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @MapperScan("org.taobao.mapper")
+//SpringBoot启动类
 public class TliasWebManagementApplication {
 
 	public static void main(String[] args) {

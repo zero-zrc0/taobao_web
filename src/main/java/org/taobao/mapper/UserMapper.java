@@ -42,8 +42,8 @@ public interface UserMapper {
      */
     @Insert("INSERT INTO user (account, password, user_type, status, username, gender, birthday, phone, email, avatar_url, create_time, update_time) "
             + "VALUES (#{account}, #{password}, #{userType}, #{status}, #{username}, #{gender}, #{birthday}, #{phone}, #{email}, #{avatarUrl}, #{createTime}, #{updateTime})")
-    @Options(useGeneratedKeys = true, keyProperty = "userId")
-    void insert(User user);
+    //让MyBatis自动获取数据库生成的自增主键ID，并赋值给User对象的userId属性。
+    @Options(useGeneratedKeys = true, keyProperty = "userId")    void insert(User user);
 
     /**
      * 获取用户列表

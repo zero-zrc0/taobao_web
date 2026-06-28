@@ -28,7 +28,7 @@ logging:
 aliyun:
   oss:
     endpoint: https://oss-cn-beijing.aliyuncs.com
-    bucketName: taobao-hqh
+    bucketName: taobao-web
     region: cn-beijing
 
 server:

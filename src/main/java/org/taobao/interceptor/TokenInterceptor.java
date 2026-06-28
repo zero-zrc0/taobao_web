@@ -14,30 +14,31 @@ import org.taobao.utils.JwtUtils;
 
 @Component
 public class TokenInterceptor implements HandlerInterceptor {
-    //日志输出
+    //日志输出，记录拦截http请求的过程
     private static final Logger log = LoggerFactory.getLogger(TokenInterceptor.class);
     
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        //3. 获取请求头中的令牌（token），支持Authorization头和Bearer前缀
+        //获取请求头中的令牌（token），支持Authorization头和Bearer前缀
         String jwt = request.getHeader("token");
         
         // 如果token为空，尝试从Authorization头获取
         if(!StringUtils.hasLength(jwt)) {
             String authorization = request.getHeader("Authorization");
+            // 检查authorization是否有值且以"Bearer "开头
             if(StringUtils.hasLength(authorization) && authorization.startsWith("Bearer ")) {
-                jwt = authorization.substring(7);
+                jwt = authorization.substring(7);//去掉Bearer前缀并赋值给jwt
             }
         }
 
-        //4. 判断令牌是否存在，如果不存在，返回错误结果（未登录）。
+        //判断令牌是否存在，如果不存在，返回错误结果（未登录）。
         if(!StringUtils.hasLength(jwt)){ //jwt为空
             log.info("获取到jwt令牌为空, 返回错误结果");
             response.setStatus(HttpStatus.SC_UNAUTHORIZED);
             return false;
         }
 
-        //5. 解析token，如果解析失败，返回错误结果（未登录）。
+        // 解析token，如果解析失败，返回错误结果（未登录）。
         try {
             // 解析JWT令牌
             Claims claims = JwtUtils.parseJWT(jwt);
@@ -66,7 +67,7 @@ public class TokenInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        //6. 放行。
+        // 放行。
         log.info("令牌合法, 放行");
         return true;
     }

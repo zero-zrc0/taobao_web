@@ -5,16 +5,15 @@ import org.taobao.dto.HomeProductQueryDTO;
 import org.taobao.dto.ProductCreateDTO;
 import org.taobao.dto.ProductQueryDTO;
 import org.taobao.dto.ProductUpdateDTO;
-import org.taobao.dto.ProductSkuCreateDTO;
 import org.taobao.dto.ProductSkuDTO;
 import org.taobao.pojo.Result;
 import org.taobao.pojo.Product;
 import org.taobao.pojo.ProductSku;
 import org.taobao.service.ProductService;
-import org.taobao.utils.AliyunOSSOperator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.taobao.utils.AliyunOSSOperator;
 
 import java.util.ArrayList;
 import java.util.List;

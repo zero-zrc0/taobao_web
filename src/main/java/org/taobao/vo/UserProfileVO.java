@@ -7,7 +7,7 @@ import java.util.Date;
 /**
  * 用户详情返回VO
  */
-@Data
+@Data//由Lombok提供，编译时自动创建getter和setter方法
 public class UserProfileVO {
     private Long userId;
     private String account;

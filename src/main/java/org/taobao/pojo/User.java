@@ -11,9 +11,9 @@ import java.util.Date;
  * 用户表实体类
  */
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@Builder//生成建造者模式，支持链式调用
+@NoArgsConstructor//生成无参构造方法
+@AllArgsConstructor//生成全参构造方法
 public class User {
     private Long userId; // 用户唯一标识ID
     private String account; // 账号，用于登录

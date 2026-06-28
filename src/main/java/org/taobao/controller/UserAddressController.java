@@ -75,6 +75,7 @@ public class UserAddressController {
      * @return 设置结果
      */
     @PutMapping("/set-default/{addressId}")
+    //将路径中的addressId提取出来赋值给方法的参数
     public Result<String> setDefaultAddress(@PathVariable Integer addressId) {
         try {
             userAddressService.setDefaultAddress(addressId);

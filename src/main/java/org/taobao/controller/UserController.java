@@ -146,9 +146,10 @@ public class UserController {
                 firstSlashIndex = user.getAvatarUrl().indexOf("/", firstSlashIndex + 1);
 
                 if (firstSlashIndex != -1) {
-                    // 提取从第4个斜杠开始的所有内容，即 yyyy/MM/UUID.xxx
+                    // 直接生成签名URL
                     String objectName = user.getAvatarUrl().substring(firstSlashIndex + 1);
                     userProfileVO.setAvatarUrl(objectName);
+
                 } else {
                     userProfileVO.setAvatarUrl(user.getAvatarUrl());
                 }
@@ -207,21 +208,16 @@ public class UserController {
             // 上传文件到OSS
             String fullAvatarUrl = aliyunOSSOperator.upload(avatar.getBytes(), uniqueFileName);
 
-            // 提取关键字符（去掉前缀，只保留yyyy/MM/xxx.jpg部分）
-            // 从完整URL中提取objectName，格式为：yyyy/MM/UUID.xxx
+            // 提取相对路径（去掉OSS域名，只保留yyyy/MM/UUID.xxx部分）
             // 完整URL格式：https://bucket-name.oss-region.aliyuncs.com/yyyy/MM/UUID.xxx
-            // 找到第4个斜杠的位置，即域名后的第一个斜杠
             int firstSlashIndex = fullAvatarUrl.indexOf("/");
             firstSlashIndex = fullAvatarUrl.indexOf("/", firstSlashIndex + 1);
             firstSlashIndex = fullAvatarUrl.indexOf("/", firstSlashIndex + 1);
-
-            // 提取从第4个斜杠开始的所有内容，即 yyyy/MM/UUID.xxx
             String objectName = fullAvatarUrl.substring(firstSlashIndex + 1);
 
-            // 创建DTO对象，设置完整的avatarUrl到数据库
+            // 创建DTO对象，设置相对路径到数据库（避免签名URL过长）
             UserProfileUpdateDTO userProfileUpdateDTO = new UserProfileUpdateDTO();
-            userProfileUpdateDTO.setAvatarUrl(fullAvatarUrl);
-
+            userProfileUpdateDTO.setAvatarUrl(objectName);
             // 调用服务层更新用户详情
             userService.updateUserProfile(userId, userProfileUpdateDTO);
 

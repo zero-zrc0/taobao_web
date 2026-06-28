@@ -212,7 +212,6 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Map<String, Long> getOrderStatusStatistics(Integer userId) {
-        // 创建订单状态统计Map，初始值都为0
         Map<String, Long> result = new HashMap<>();
         result.put("pending", 0L);
         result.put("paid", 0L);
@@ -221,33 +220,17 @@ public class OrderServiceImpl implements OrderService {
         result.put("cancelled", 0L);
 
         try {
-            // 调用mapper获取各状态订单数量
-            List<Map<String, Object>> statusList = orderMapper.getOrderStatusStatistics(userId);
+            Map<String, Object> statusMap = orderMapper.getOrderStatusStatistics(userId);
 
-            // 如果查询结果不为空，更新统计数据
-            if (statusList != null && !statusList.isEmpty()) {
-                // 如果是单行结果（CASE WHEN查询）
-                if (statusList.size() == 1) {
-                    Map<String, Object> statusMap = statusList.get(0);
-                    for (Map.Entry<String, Long> entry : result.entrySet()) {
-                        Object value = statusMap.get(entry.getKey());
-                        if (value != null) {
-                            result.put(entry.getKey(), ((Number) value).longValue());
-                        }
-                    }
-                } else {
-                    // 如果是多行结果（GROUP BY查询）
-                    for (Map<String, Object> statusMap : statusList) {
-                        String status = (String) statusMap.get("status");
-                        Long count = ((Number) statusMap.get("count")).longValue();
-                        if (result.containsKey(status)) {
-                            result.put(status, count);
-                        }
+            if (statusMap != null) {
+                for (Map.Entry<String, Long> entry : result.entrySet()) {
+                    Object value = statusMap.get(entry.getKey());
+                    if (value != null) {
+                        result.put(entry.getKey(), ((Number) value).longValue());
                     }
                 }
             }
         } catch (Exception e) {
-            // 如果查询失败，返回初始值为0的统计结果
             e.printStackTrace();
         }
 
