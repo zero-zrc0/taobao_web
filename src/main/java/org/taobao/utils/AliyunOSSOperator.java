@@ -52,4 +52,9 @@ public class AliyunOSSOperator {
 
         return endpoint.split("//")[0] + "//" + bucketName + "." + endpoint.split("//")[1] + "/" + objectName;
     }
+    public String generateSignedUrl(String url) {
+        return aliyunOSSProperties.getBucketName()
+                .concat(aliyunOSSProperties.getRegion())
+                .concat(".aliyuncs.com").concat(url);
+    }
 }

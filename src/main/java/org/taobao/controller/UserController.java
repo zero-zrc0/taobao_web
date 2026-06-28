@@ -139,20 +139,7 @@ public class UserController {
 
             // 从完整URL中提取中间的数据和后缀，格式为：yyyy/MM/UUID.xxx
             if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
-                // 完整URL格式：https://bucket-name.oss-region.aliyuncs.com/yyyy/MM/UUID.xxx
-                // 找到第4个斜杠的位置，即域名后的第一个斜杠
-                int firstSlashIndex = user.getAvatarUrl().indexOf("/");
-                firstSlashIndex = user.getAvatarUrl().indexOf("/", firstSlashIndex + 1);
-                firstSlashIndex = user.getAvatarUrl().indexOf("/", firstSlashIndex + 1);
-
-                if (firstSlashIndex != -1) {
-                    // 直接生成签名URL
-                    String objectName = user.getAvatarUrl().substring(firstSlashIndex + 1);
-                    userProfileVO.setAvatarUrl(objectName);
-
-                } else {
-                    userProfileVO.setAvatarUrl(user.getAvatarUrl());
-                }
+               userProfileVO.setAvatarUrl(aliyunOSSOperator.generateSignedUrl(user.getAvatarUrl()));
             }
 
             userProfileVO.setCreateTime(user.getCreateTime());
