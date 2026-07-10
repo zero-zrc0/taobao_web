@@ -15,6 +15,7 @@ import org.taobao.pojo.Product;
 import org.taobao.pojo.ProductSku;
 import org.taobao.service.CartService;
 import org.taobao.utils.AliyunOSSOperator;
+import org.taobao.utils.OssUrlUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -166,19 +167,26 @@ public class CartServiceImpl implements CartService {
                     cartItem.getSkuId(), cartItem.getQuantity());
             // 根据skuId查询SKU信息
             ProductSku sku = productSkuMapper.findById(cartItem.getSkuId());
+            Product product = null;
 
             // 如果SKU存在，获取对应的商品名称
             if (sku != null) {
                 // 根据productId查询商品信息，获取商品名称
-                Product product = productMapper.findById(sku.getProductId());
+                product = productMapper.findById(sku.getProductId());
                 if (product != null) {
                     // 设置商品名称到SKU对象中
                     sku.setProductName(product.getProductName());
                 }
             }
 
-            if (sku != null && sku.getSkuImage() != null && !sku.getSkuImage().isBlank()) {
-                sku.setSkuImage(aliyunOSSOperator.generateSignedUrl(sku.getSkuImage()));
+            if (sku != null) {
+                String imagePath = sku.getSkuImage();
+                if ((imagePath == null || imagePath.isBlank()) && product != null) {
+                    imagePath = OssUrlUtils.extractFirstObjectKey(product.getMainImages());
+                }
+                if (imagePath != null && !imagePath.isBlank()) {
+                    sku.setSkuImage(aliyunOSSOperator.generateSignedUrl(imagePath));
+                }
             }
 
             // 设置SKU信息到购物车项

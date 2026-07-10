@@ -32,4 +32,21 @@ public final class OssUrlUtils {
                 .map(OssUrlUtils::extractObjectKey)
                 .collect(Collectors.joining(","));
     }
+
+    public static String extractFirstObjectKey(String values) {
+        if (values == null || values.isBlank()) {
+            return values;
+        }
+
+        String firstValue = values.trim();
+        if (firstValue.startsWith("[") && firstValue.endsWith("]")) {
+            firstValue = firstValue.substring(1, firstValue.length() - 1).trim();
+        }
+        int separatorIndex = firstValue.indexOf(',');
+        if (separatorIndex >= 0) {
+            firstValue = firstValue.substring(0, separatorIndex);
+        }
+        firstValue = firstValue.trim().replaceAll("^\"|\"$", "");
+        return extractObjectKey(firstValue);
+    }
 }

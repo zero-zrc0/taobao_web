@@ -23,4 +23,11 @@ class OssUrlUtilsTest {
     void preservesRelativeObjectKey() {
         assertEquals("2026/07/image.png", OssUrlUtils.extractObjectKey("2026/07/image.png"));
     }
+
+    @Test
+    void extractsFirstObjectKeyFromJsonImageList() {
+        assertEquals("2026/07/one.png", OssUrlUtils.extractFirstObjectKey(
+                "[\"https://taobao-web.oss-cn-beijing.aliyuncs.com/2026/07/one.png\","
+                        + "\"https://taobao-web.oss-cn-beijing.aliyuncs.com/2026/07/two.png\"]"));
+    }
 }
