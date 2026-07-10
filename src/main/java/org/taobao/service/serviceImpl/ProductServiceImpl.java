@@ -16,6 +16,8 @@ import org.taobao.mapper.ProductSkuMapper;
 import org.taobao.pojo.Product;
 import org.taobao.pojo.ProductSku;
 import org.taobao.service.ProductService;
+import org.taobao.utils.OssUrlUtils;
+import org.taobao.utils.AliyunOSSOperator;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -38,12 +40,18 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private ProductSkuMapper productSkuMapper;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Autowired
+    private AliyunOSSOperator aliyunOSSOperator;
+
     @Override
     public ProductSku getSkuById(Integer skuId) {
         ProductSku sku = productSkuMapper.findById(skuId);
         if (sku == null) {
             throw new ProductNotFoundException("SKU不存在");
         }
+        fillSkuImageUrls(List.of(sku));
         return sku;
     }
 
@@ -77,6 +85,7 @@ public class ProductServiceImpl implements ProductService {
                 product.setPrice(skus.get(0).getPrice());
             }
         }
+        fillImageUrls(products);
         return products;
     }
 
@@ -95,21 +104,13 @@ public class ProductServiceImpl implements ProductService {
         // 处理主图
         String mainImages = productCreateDTO.getMainImages();
         if (mainImages != null && !mainImages.isEmpty()) {
-            // 去除OSS前缀
-            if (mainImages.startsWith("https://taobao-hqh.oss-cn-beijing.aliyuncs.com/")) {
-                mainImages = mainImages.substring("https://taobao-hqh.oss-cn-beijing.aliyuncs.com/".length());
-            }
-            product.setMainImages(mainImages);
+            product.setMainImages(OssUrlUtils.extractObjectKeys(mainImages));
         }
 
         // 处理详情图
         String detailImages = productCreateDTO.getDetailImages();
         if (detailImages != null && !detailImages.isEmpty()) {
-            // 去除OSS前缀
-            if (detailImages.startsWith("https://taobao-hqh.oss-cn-beijing.aliyuncs.com/")) {
-                detailImages = detailImages.substring("https://taobao-hqh.oss-cn-beijing.aliyuncs.com/".length());
-            }
-            product.setDetailImages(detailImages);
+            product.setDetailImages(OssUrlUtils.extractObjectKeys(detailImages));
         }
 
         product.setCategoryId(productCreateDTO.getCategoryId());
@@ -135,12 +136,8 @@ public class ProductServiceImpl implements ProductService {
                 // 处理可选的库存数量，默认为50
                 productSku.setStock(skuCreateDTO.getStock() != null ? skuCreateDTO.getStock() : 50);
 
-                // 处理SKU图片，去除OSS前缀
                 String skuImage = skuCreateDTO.getSkuImage();
-                if (skuImage != null && skuImage.startsWith("https://taobao-hqh.oss-cn-beijing.aliyuncs.com/")) {
-                    skuImage = skuImage.substring("https://taobao-hqh.oss-cn-beijing.aliyuncs.com/".length());
-                }
-                productSku.setSkuImage(skuImage);
+                productSku.setSkuImage(OssUrlUtils.extractObjectKey(skuImage));
 
                 productSku.setStatus("on_sale"); // 默认上架状态
                 productSku.setCreateTime(now);
@@ -171,11 +168,7 @@ public class ProductServiceImpl implements ProductService {
         // 处理主图
         String mainImages = productUpdateDTO.getMainImages();
         if (mainImages != null && !mainImages.isEmpty()) {
-            // 去除OSS前缀
-            if (mainImages.startsWith("https://taobao-hqh.oss-cn-beijing.aliyuncs.com/")) {
-                mainImages = mainImages.substring("https://taobao-hqh.oss-cn-beijing.aliyuncs.com/".length());
-            }
-            product.setMainImages(mainImages);
+            product.setMainImages(OssUrlUtils.extractObjectKeys(mainImages));
         } else {
             product.setMainImages(null);
         }
@@ -183,11 +176,7 @@ public class ProductServiceImpl implements ProductService {
         // 处理详情图
         String detailImages = productUpdateDTO.getDetailImages();
         if (detailImages != null && !detailImages.isEmpty()) {
-            // 去除OSS前缀
-            if (detailImages.startsWith("https://taobao-hqh.oss-cn-beijing.aliyuncs.com/")) {
-                detailImages = detailImages.substring("https://taobao-hqh.oss-cn-beijing.aliyuncs.com/".length());
-            }
-            product.setDetailImages(detailImages);
+            product.setDetailImages(OssUrlUtils.extractObjectKeys(detailImages));
         } else {
             product.setDetailImages(null);
         }
@@ -217,12 +206,8 @@ public class ProductServiceImpl implements ProductService {
                     productSku.setStock(skuUpdateDTO.getStock());
                 }
 
-                // 处理SKU图片，去除OSS前缀
                 String skuImage = skuUpdateDTO.getSkuImage();
-                if (skuImage != null && skuImage.startsWith("https://taobao-hqh.oss-cn-beijing.aliyuncs.com/")) {
-                    skuImage = skuImage.substring("https://taobao-hqh.oss-cn-beijing.aliyuncs.com/".length());
-                }
-                productSku.setSkuImage(skuImage);
+                productSku.setSkuImage(OssUrlUtils.extractObjectKey(skuImage));
 
                 productSku.setStatus(skuUpdateDTO.getStatus());
                 productSku.setUpdateTime(new Date());
@@ -302,12 +287,16 @@ public class ProductServiceImpl implements ProductService {
 
         // 设置店铺ID到查询条件中
         productQueryDTO.setShopId(shopId);
-        return productMapper.getShopProductList(productQueryDTO);
+        List<Product> products = productMapper.getShopProductList(productQueryDTO);
+        fillImageUrls(products);
+        return products;
     }
 
     @Override
     public List<ProductSku> getProductSkus(Integer productId) {
-        return productSkuMapper.findByProductId(productId);
+        List<ProductSku> skus = productSkuMapper.findByProductId(productId);
+        fillSkuImageUrls(skus);
+        return skus;
     }
 
     @Override
@@ -333,6 +322,7 @@ public class ProductServiceImpl implements ProductService {
         // 直接返回查询到的商品，不进行重复填充
         // 对结果进行随机排序
         Collections.shuffle(products);
+        fillImageUrls(products);
         return products;
     }
 
@@ -347,6 +337,7 @@ public class ProductServiceImpl implements ProductService {
         if (skus != null && !skus.isEmpty()) {
             product.setPrice(skus.get(0).getPrice());
         }
+        fillImageUrls(List.of(product));
         return product;
     }
 
@@ -356,6 +347,7 @@ public class ProductServiceImpl implements ProductService {
         if (product == null) {
             throw new ProductNotFoundException("商品不存在");
         }
+        fillImageUrls(List.of(product));
         return product;
     }
 
@@ -388,7 +380,7 @@ public class ProductServiceImpl implements ProductService {
         existingSku.setSkuType(productSku.getSkuType());
         existingSku.setPrice(productSku.getPrice());
         existingSku.setStock(productSku.getStock());
-        existingSku.setSkuImage(productSku.getSkuImage());
+        existingSku.setSkuImage(OssUrlUtils.extractObjectKey(productSku.getSkuImage()));
         existingSku.setStatus(productSku.getStatus());
         existingSku.setUpdateTime(new Date());
 
@@ -409,7 +401,7 @@ public class ProductServiceImpl implements ProductService {
                 String imagePath = skuImagePaths.get(i);
 
                 if (imagePath != null) {
-                    sku.setSkuImage(imagePath);
+                    sku.setSkuImage(OssUrlUtils.extractObjectKey(imagePath));
                     sku.setUpdateTime(new Date());
                     productSkuMapper.update(sku);
                 }
@@ -431,7 +423,56 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Product> getProductDetailsByShopId(Integer shopId) {
-        return productMapper.getProductDetailsByShopId(shopId);
+        List<Product> products = productMapper.getProductDetailsByShopId(shopId);
+        fillImageUrls(products);
+        return products;
+    }
+
+    private void fillImageUrls(List<Product> products) {
+        if (products == null) {
+            return;
+        }
+        for (Product product : products) {
+            if (product == null) {
+                continue;
+            }
+            product.setMainImages(toFullImageUrls(product.getMainImages()));
+            product.setDetailImages(toFullImageUrls(product.getDetailImages()));
+            fillSkuImageUrls(product.getSkus());
+        }
+    }
+
+    private void fillSkuImageUrls(List<ProductSku> skus) {
+        if (skus == null) {
+            return;
+        }
+        for (ProductSku sku : skus) {
+            if (sku != null && sku.getSkuImage() != null && !sku.getSkuImage().isBlank()) {
+                sku.setSkuImage(aliyunOSSOperator.generateSignedUrl(sku.getSkuImage()));
+            }
+        }
+    }
+
+    private String toFullImageUrls(String imageUrls) {
+        if (imageUrls == null || imageUrls.isBlank()) {
+            return imageUrls;
+        }
+
+        String trimmedImageUrls = imageUrls.trim();
+        if (trimmedImageUrls.startsWith("[") && trimmedImageUrls.endsWith("]")) {
+            try {
+                List<String> imagePaths = objectMapper.readValue(trimmedImageUrls, new TypeReference<List<String>>() {});
+                return objectMapper.writeValueAsString(imagePaths.stream()
+                        .map(aliyunOSSOperator::generateSignedUrl)
+                        .toList());
+            } catch (JsonProcessingException e) {
+                // Fall through to support legacy comma-separated values.
+            }
+        }
+
+        return java.util.Arrays.stream(imageUrls.split("\\s*,\\s*"))
+                .map(aliyunOSSOperator::generateSignedUrl)
+                .collect(java.util.stream.Collectors.joining(","));
     }
 
     @Override

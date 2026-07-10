@@ -485,11 +485,11 @@ public class ShopController {
 
             // 更新店铺logo
             ShopUpdateDTO shopUpdateDTO = new ShopUpdateDTO();
-            shopUpdateDTO.setShopLogo(fullLogoUrl);
+            shopUpdateDTO.setShopLogo(objectName);
             shopService.updateShopByMerchantId(merchantId, shopUpdateDTO);
 
             // 返回成功提示和关键字符
-            return Result.success(objectName);
+            return Result.success(aliyunOSSOperator.generateSignedUrl(objectName));
         } catch (Exception e) {
             return Result.error("上传店铺logo失败：" + e.getMessage());
         }
@@ -528,11 +528,11 @@ public class ShopController {
 
             // 更新店铺横幅
             ShopUpdateDTO shopUpdateDTO = new ShopUpdateDTO();
-            shopUpdateDTO.setShopBanner(fullBannerUrl);
+            shopUpdateDTO.setShopBanner(objectName);
             shopService.updateShopByMerchantId(merchantId, shopUpdateDTO);
 
             // 返回成功提示和关键字符
-            return Result.success(objectName);
+            return Result.success(aliyunOSSOperator.generateSignedUrl(objectName));
         } catch (Exception e) {
             return Result.error("上传店铺横幅失败：" + e.getMessage());
         }
@@ -569,7 +569,7 @@ public class ShopController {
                 }
             }
 
-            return Result.success(relativePath);
+            return Result.success(aliyunOSSOperator.generateSignedUrl(relativePath));
         } catch (Exception e) {
             return Result.error("商品主图上传失败：" + e.getMessage());
         }
@@ -602,7 +602,7 @@ public class ShopController {
                 }
             }
 
-            return Result.success(relativePath);
+            return Result.success(aliyunOSSOperator.generateSignedUrl(relativePath));
         } catch (Exception e) {
             return Result.error("商品详情图上传失败：" + e.getMessage());
         }

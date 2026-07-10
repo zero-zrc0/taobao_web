@@ -4,10 +4,12 @@ import com.aliyun.oss.*;
 import com.aliyun.oss.common.auth.CredentialsProviderFactory;
 import com.aliyun.oss.common.auth.EnvironmentVariableCredentialsProvider;
 import com.aliyun.oss.common.comm.SignVersion;
+import com.aliyun.oss.model.ObjectMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
+import java.net.URLConnection;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
@@ -45,7 +47,11 @@ public class AliyunOSSOperator {
                 .build();
 
         try {
-            ossClient.putObject(bucketName, objectName, new ByteArrayInputStream(content));
+            ObjectMetadata metadata = new ObjectMetadata();
+            String contentType = URLConnection.guessContentTypeFromName(originalFilename);
+            metadata.setContentType(contentType != null ? contentType : "application/octet-stream");
+            metadata.setContentDisposition("inline");
+            ossClient.putObject(bucketName, objectName, new ByteArrayInputStream(content), metadata);
         } finally {
             ossClient.shutdown();
         }
@@ -53,8 +59,24 @@ public class AliyunOSSOperator {
         return endpoint.split("//")[0] + "//" + bucketName + "." + endpoint.split("//")[1] + "/" + objectName;
     }
     public String generateSignedUrl(String url) {
-        return aliyunOSSProperties.getBucketName()
-                .concat(aliyunOSSProperties.getRegion())
-                .concat(".aliyuncs.com").concat(url);
+        if (url == null || url.isBlank()) {
+            return url;
+        }
+        if (url.startsWith("http://") || url.startsWith("https://")) {
+            return url;
+        }
+
+        String endpoint = aliyunOSSProperties.getEndpoint().replaceAll("/+$", "");
+        int schemeEnd = endpoint.indexOf("://");
+        if (schemeEnd < 0) {
+            throw new IllegalStateException("Invalid OSS endpoint: " + endpoint);
+        }
+
+        return endpoint.substring(0, schemeEnd + 3)
+                + aliyunOSSProperties.getBucketName()
+                + "."
+                + endpoint.substring(schemeEnd + 3)
+                + "/"
+                + url.replaceFirst("^/+", "");
     }
 }

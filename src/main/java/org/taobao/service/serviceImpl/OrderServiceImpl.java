@@ -14,6 +14,7 @@ import org.taobao.pojo.ProductSku;
 import org.taobao.pojo.UserAddress;
 import org.taobao.service.OrderService;
 import org.taobao.service.UserAddressService;
+import org.taobao.utils.AliyunOSSOperator;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -36,6 +37,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private UserAddressService userAddressService;
+
+    @Autowired
+    private AliyunOSSOperator aliyunOSSOperator;
 
     @Override
     public Integer createOrder(OrderCreateDTO orderCreateDTO) {
@@ -147,6 +151,7 @@ public class OrderServiceImpl implements OrderService {
                 // 否则获取订单的所有商品项
                 orderItems = orderMapper.getOrderItemsByOrderId(order.getOrderId());
             }
+            orderItems.forEach(this::fillOrderItemImageUrl);
             order.setOrderItems(orderItems);
 
             // 从用户地址表中获取收货人姓名和电话
@@ -192,6 +197,7 @@ public class OrderServiceImpl implements OrderService {
         Orders order = orderMapper.getOrderById(orderId);
         if (order != null) {
             List<OrderItem> orderItems = orderMapper.getOrderItemsByOrderId(orderId);
+            orderItems.forEach(this::fillOrderItemImageUrl);
             order.setOrderItems(orderItems);
 
             // 从用户地址表中获取收货人姓名和电话
@@ -202,7 +208,15 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<OrderItem> getOrderItems(Integer orderId) {
-        return orderMapper.getOrderItemsByOrderId(orderId);
+        List<OrderItem> orderItems = orderMapper.getOrderItemsByOrderId(orderId);
+        orderItems.forEach(this::fillOrderItemImageUrl);
+        return orderItems;
+    }
+
+    private void fillOrderItemImageUrl(OrderItem orderItem) {
+        if (orderItem != null && orderItem.getSkuImage() != null && !orderItem.getSkuImage().isBlank()) {
+            orderItem.setSkuImage(aliyunOSSOperator.generateSignedUrl(orderItem.getSkuImage()));
+        }
     }
 
     @Override

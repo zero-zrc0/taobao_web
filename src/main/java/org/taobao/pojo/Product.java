@@ -1,7 +1,6 @@
 package org.taobao.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,28 +31,6 @@ public class Product {
     private Date updateTime; // 修改时间
     private List<ProductSku> skus; // 商品SKU列表
     private BigDecimal price; // 商品第一个SKU的价格
-
-    // 使用@JsonProperty注解控制mainImages字段的JSON序列化，只返回单个URL
-    @JsonProperty("mainImages")
-    public String getMainImageSingleUrl() {
-        if (mainImages == null || mainImages.isEmpty()) {
-            return null;
-        }
-        // 返回第一张图片URL
-        String[] images = mainImages.split("\\s*,\\s*");
-        return images.length > 0 ? images[0] : null;
-    }
-
-    // 使用@JsonProperty注解控制detailImages字段的JSON序列化，只返回单个URL
-    @JsonProperty("detailImages")
-    public String getDetailImageSingleUrl() {
-        if (detailImages == null || detailImages.isEmpty()) {
-            return null;
-        }
-        // 返回第一张图片URL
-        String[] images = detailImages.split("\\s*,\\s*");
-        return images.length > 0 ? images[0] : null;
-    }
 
     /**
      * 获取主图URL列表（为了兼容性保留）

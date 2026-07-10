@@ -12,6 +12,7 @@ import org.taobao.exception.ShopNameAlreadyExistsException;
 import org.taobao.mapper.ShopMapper;
 import org.taobao.pojo.Shop;
 import org.taobao.service.ShopService;
+import org.taobao.utils.OssUrlUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -73,13 +74,11 @@ public class ShopServiceImpl implements ShopService {
         // 处理店铺logo和横幅图片，去除OSS前缀并转换为JSON数组格式存储
         // 处理店铺logo和横幅图片，存储完整URL
         if (shopCreateDTO.getShopLogo() != null && !shopCreateDTO.getShopLogo().isEmpty()) {
-            // 存储完整URL
-            shop.setShopLogo(shopCreateDTO.getShopLogo());
+            shop.setShopLogo(OssUrlUtils.extractObjectKey(shopCreateDTO.getShopLogo()));
         }
 
         if (shopCreateDTO.getShopBanner() != null && !shopCreateDTO.getShopBanner().isEmpty()) {
-            // 存储完整URL
-            shop.setShopBanner(shopCreateDTO.getShopBanner());
+            shop.setShopBanner(OssUrlUtils.extractObjectKey(shopCreateDTO.getShopBanner()));
         }
 
         shop.setStatus("normal"); // 默认正常状态，创建即激活
@@ -119,8 +118,7 @@ public class ShopServiceImpl implements ShopService {
             if (shopUpdateDTO.getShopLogo().isEmpty()) {
                 shop.setShopLogo(null);
             } else {
-                // 存储完整URL
-                shop.setShopLogo(shopUpdateDTO.getShopLogo());
+                shop.setShopLogo(OssUrlUtils.extractObjectKey(shopUpdateDTO.getShopLogo()));
             }
         }
 
@@ -128,8 +126,7 @@ public class ShopServiceImpl implements ShopService {
             if (shopUpdateDTO.getShopBanner().isEmpty()) {
                 shop.setShopBanner(null);
             } else {
-                // 存储完整URL
-                shop.setShopBanner(shopUpdateDTO.getShopBanner());
+                shop.setShopBanner(OssUrlUtils.extractObjectKey(shopUpdateDTO.getShopBanner()));
             }
         }
 

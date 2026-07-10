@@ -209,7 +209,7 @@ public class UserController {
             userService.updateUserProfile(userId, userProfileUpdateDTO);
 
             // 返回成功提示和关键字符
-            return Result.success(objectName);
+            return Result.success(aliyunOSSOperator.generateSignedUrl(objectName));
         } catch (Exception e) {
             return Result.error("修改头像失败：" + e.getMessage());
         }

@@ -310,7 +310,7 @@ public class ProductController {
             String objectName = fullImageUrl.substring(firstSlashIndex + 1);
 
             // 返回成功提示和关键字符
-            return Result.success(objectName);
+            return Result.success(aliyunOSSOperator.generateSignedUrl(objectName));
         } catch (Exception e) {
             return Result.error("上传SKU图片失败：" + e.getMessage());
         }

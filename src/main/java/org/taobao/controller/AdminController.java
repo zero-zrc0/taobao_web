@@ -244,7 +244,7 @@ public class AdminController {
             userService.updateUserProfile(id, userProfileUpdateDTO);
 
             // 返回成功提示和相对路径
-            return Result.success(objectName);
+            return Result.success(aliyunOSSOperator.generateSignedUrl(objectName));
         } catch (Exception e) {
             return Result.error("用户头像修改失败：" + e.getMessage());
         }

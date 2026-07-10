@@ -149,10 +149,10 @@ public class UploadController {
             Date now = new Date();
             if ("main".equals(imageType)) {
                 // 更新主图，使用简单的字符串拼接生成JSON数组
-                product.setMainImages("[" + relativePath + "]");
+                product.setMainImages("[\"" + relativePath + "\"]");
             } else if ("detail".equals(imageType)) {
                 // 更新详情图，使用简单的字符串拼接生成JSON数组
-                product.setDetailImages("[" + relativePath + "]");
+                product.setDetailImages("[\"" + relativePath + "\"]");
             } else {
                 log.error("无效的图片类型：{}", imageType);
                 return Result.error("无效的图片类型，支持main或detail");
@@ -263,7 +263,7 @@ public class UploadController {
             }
             log.info("截取后的相对路径：{}", relativePath);
 
-            return Result.success(relativePath);
+            return Result.success(aliyunOSSOperator.generateSignedUrl(relativePath));
         } catch (Exception e) {
             log.error("商品主图上传失败：", e);
             return Result.error("商品主图上传失败：" + e.getMessage());
@@ -309,7 +309,7 @@ public class UploadController {
             }
             log.info("截取后的相对路径：{}", relativePath);
 
-            return Result.success(relativePath);
+            return Result.success(aliyunOSSOperator.generateSignedUrl(relativePath));
         } catch (Exception e) {
             log.error("商品详情图上传失败：", e);
             return Result.error("商品详情图上传失败：" + e.getMessage());
@@ -366,7 +366,7 @@ public class UploadController {
                 return Result.error("没有成功上传的文件");
             }
 
-            return Result.success(relativePaths);
+            return Result.success(relativePaths.stream().map(aliyunOSSOperator::generateSignedUrl).toList());
         } catch (Exception e) {
             log.error("批量商品主图上传失败：", e);
             return Result.error("批量商品主图上传失败：" + e.getMessage());
@@ -423,7 +423,7 @@ public class UploadController {
                 return Result.error("没有成功上传的文件");
             }
 
-            return Result.success(relativePaths);
+            return Result.success(relativePaths.stream().map(aliyunOSSOperator::generateSignedUrl).toList());
         } catch (Exception e) {
             log.error("批量商品详情图上传失败：", e);
             return Result.error("批量商品详情图上传失败：" + e.getMessage());
